@@ -1,4 +1,6 @@
 import FWCore.ParameterSet.Config as cms
+# Command line argument parsing
+import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process('SKIM')
 
@@ -13,6 +15,38 @@ process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
+## Options and Output Report
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(False),
+																			SkipEvent = cms.untracked.vstring('ProductNotFound')
+)
+
+# setup 'analysis'  options
+options = VarParsing.VarParsing ('analysis')
+
+# setup any defaults you want
+options.maxEvents = -1 # -1 means all events
+options.inputFiles= 'root://eoscms//eos/cms/store/relval/CMSSW_7_2_0_pre6/RelValZMM_13/GEN-SIM-RECO/PU50ns_PRE_LS172_V12-v1/00000/E44FB840-6442-E411-8AFC-0025905A60DA.root'
+options.outputFile = 'output/test.root'
+options.register ('test',
+                  0, # default value
+                  VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+                  VarParsing.VarParsing.varType.int,          # string, int, or float
+                  "Testing option. Set to 1 to enable testing options.")
+options.test = 0
+
+
+# get and parse the command line arguments
+options.parseArguments()
+
+if options.test: print """
+options.test set to True. Using test settings.
+Running over 100 events.
+Output file set to output/basicSkim_test.root
+"""
+
+# # Unscheduled mode
+process.options.allowUnscheduled = cms.untracked.bool(True)
+
 
 
 ### =========== Global configuration ==========================
@@ -25,7 +59,6 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 ### ===========================================================
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc')
-# process.GlobalTag = GlobalTag(process.GlobalTag, 'PRE_LS172_V11::All')
 
 ZMM_720p6_PU50 = cms.untracked.vstring(
 "root://eoscms//eos/cms/store/relval/CMSSW_7_2_0_pre6/RelValZMM_13/GEN-SIM-RECO/PU50ns_PRE_LS172_V12-v1/00000/025E473F-6442-E411-BDFE-0025905A60BC.root",
@@ -62,13 +95,14 @@ ZEE_720p4_PU25 = cms.untracked.vstring(
 )
 
 process.source = cms.Source("PoolSource",
-    fileNames = ZMM_720p6_PU0,
+    fileNames = ZMM_720p6_PU25,
     skipEvents = cms.untracked.uint32(0)
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
     )
+if options.test: process.maxEvents.input = cms.untracked.int32(100)
 
 ##
 ## To remove the "begin job processing line " from printing
@@ -95,13 +129,64 @@ process.dummy = cms.EDAnalyzer("Dummy")
 # Use PF2PAT to use PF as input to PAT instead of standard RECO
 # from PhysicsTools.PatAlgos.patTemplate_cfg import *
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
+# Copied from patTuple_PF2PAT_cfg.py
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
+# First PF2PAT
+postfix = "PFlowNoChs"
+jetAlgo="AK4"
+pvCollection = cms.InputTag('offlinePrimaryVertices')
+# jetCorrections=('AK4PF', ['L1FastJet','L2Relative','L3Absolute'],'None')
+usePF2PAT(process, runPF2PAT=True, jetAlgo=jetAlgo, runOnMC=True, postfix=postfix, pvCollection=pvCollection)
+switchJetCollection(process,
+		postfix = postfix,
+		jetSource = cms.InputTag('ak4PFJets'),
+		pvSource = pvCollection,
+		algo = jetAlgo,
+		jetCorrections = ('AK4PF', ['L1FastJet', 'L2Relative', 'L3Absolute'], ''),
+		# outputModules = 'out'
+)
+# Second PF2PAT
+postfix = "PFlowChs"
+jetAlgo="AK4"
+pvCollection = cms.InputTag('offlinePrimaryVertices')
+# jetCorrections=('AK4PFchs', ['L1FastJet','L2Relative','L3Absolute'],'None')
+usePF2PAT(process, runPF2PAT=True, jetAlgo=jetAlgo, runOnMC=True, postfix=postfix, pvCollection=pvCollection)
+switchJetCollection(process,
+		postfix = postfix,
+		jetSource = cms.InputTag('ak4PFJetsCHS'),
+		pvSource = pvCollection,
+		algo = jetAlgo,
+		jetCorrections = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], ''),
+		# outputModules = 'out'
+)
+# addJetCollection(process,
+# 		labelName = 'CHS',
+# 		postfix = postfix,
+# 		jetSource = cms.InputTag('ak4PFJetsCHS'),
+# 		pvSource = pvCollection,
+# 		algo = jetAlgo,
+# 		jetCorrections = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], ''),
+# 		# outputModules = 'out'
+# )
+# process.cleanPatJetsCHSPFlow = process.cleanPatJetsPFlow.clone(src = 'selectedPatJetsCHSPFlow')
+# # top projections in PF2PAT:
+# getattr(process,"pfNoPileUpJME"+postfix).enable = True
+# getattr(process,"pfNoMuonJME"+postfix).enable = True
+# getattr(process,"pfNoElectronJME"+postfix).enable = True
+# getattr(process,"pfNoTau"+postfix).enable = False
+# getattr(process,"pfNoJet"+postfix).enable = True
+# # to use tau-cleaned jet collection uncomment the following:
+# #getattr(process,"pfNoTau"+postfix).enable = True
+#
+# # verbose flags for the PF2PAT modules
+# getattr(process,"pfNoMuonJME"+postfix).verbose = False
+#
+# # enable delta beta correction for muon selection in PF2PAT?
+# getattr(process,"pfIsolatedMuons"+postfix).doDeltaBetaCorrection = cms.bool(False)
 
 process.load("JetMETCorrections.Type1MET.correctedMet_cff")
 process.load("JetMETCorrections.Type1MET.correctionTermsPfMetType1Type2_cff")
-
-
 
 process.load("JetMETCorrections.Configuration.JetCorrectionServices_cff")
 process.ak4PFCHSL1Fastjet.algorithm = cms.string('AK4PFchs')
@@ -118,15 +203,6 @@ process.pfMetT1CHS = process.pfMetT1.clone(
 		)
 )
 
-# Corrected jet collection
-process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-
-# process.ak4PFJetsL1FastL2L3   = cms.EDProducer('PFJetCorrectionProducer',
-# 		src         = cms.InputTag('ak4PFJets'),
-# 		correctors  = cms.vstring('ak4PFL1FastL2L3')
-# )
-
-
 #
 # PATH definition , define which filter and sequence will be used before the NtupleMaker
 #
@@ -138,38 +214,68 @@ process.p = cms.Path(
     process.correctionTermsPfMetType1Type2*
     process.corrPfMetType1CHS*
     process.pfMetT1*
-    process.pfMetT1CHS*
-		process.patDefaultSequence*
-		process.ak4PFJetsL1FastL2L3
+    process.pfMetT1CHS
+		# process.patDefaultSequence
+		# process.cleanPatJetsCHSPFlow
 		# process.metFilter
    #pat sequence
 #   process.pat_sequence
 )
 
+# Add PF2PAT output to the created file
+from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
+
 process.out = cms.OutputModule(
     "PoolOutputModule",
     splitLevel = cms.untracked.int32(0),
-    outputCommands = cms.untracked.vstring(
-			'keep *',
-			# # 'drop *_*_*_*',
-			# # 'keep recoGenMETs_*_*_*', 
-			# # 'keep recoCaloMETs_*_*_*', 
-			# 'keep recoPFMETs_*_*_*', 
-			# 'keep CorrMETData_*_*_*', 
-			# 'keep *_cleanPatMuons_*_*', 
-			# 'keep *_ak4PFJets_*_*', 
-			# 'keep *_ak4PFJetsCHS_*_*', 
-			# 'keep *_offlinePrimaryVertices_*_*', 
-			# # 'keep CorrMETData_*_*_*', 
-			# # Keep anything produced by metFilter
-			# # 'keep *_metFilter_*_*',
-			),
     # outputCommands = cms.untracked.vstring('keep *',),
-    fileName = cms.untracked.string('output/basicSkim_test.root')
+    fileName = cms.untracked.string('output/basicSkim_ZMM_720p6_PU25.root')
+    # fileName = cms.untracked.string('output/basicSkim_test.root')
 )
+if options.test: process.out.fileName = cms.untracked.string('output/basicSkim_test.root')
+process.out.outputCommands = cms.untracked.vstring(
+		# 'keep *',
+	'drop *',
+	# 'keep recoGenMETs_*_*_*',
+	# 'keep recoCaloMETs_*_*_*',
+	# 'keep recoPFMETs_*_*_*',
+	# 'keep CorrMETData_*_*_*',
+	'keep *_pfMetT1_*_*',
+	'keep *_corrPfMetType1_*_*',
+	'keep *_pfMetT1CHS_*_*',
+	'keep *_corrPfMetType1CHS_*_*',
+	########
+	# Muons
+	'keep *_cleanPatMuons_*_*',
+	########
+	# Jets
+	'keep *_selectedPatJets_*_*',
+	# 'keep *_selectedPatJetsPFlow_*_*',
+	# 'keep *_selectedPatJetsCHSPFlow_*_*',
+	'keep *_selectedPatJetsPFlowNoChs_*_*',
+	'keep *_selectedPatJetsPFlowChs_*_*',
+	'keep *_cleanPatJets_*_*',
+	# 'keep *_cleanPatJetsPFlow_*_*',
+	# 'keep *_cleanPatJetsCHSPFlow_*_*',
+	'keep *_cleanPatJetsPFlowNoChs_*_*',
+	'keep *_cleanPatJetsPFlowChs_*_*',
+	'keep *_ak4PFJets_*_*',
+	'keep *_ak4PFJetsCHS_*_*',
+	'keep *_offlinePrimaryVertices_*_*',
+	# 'keep CorrMETData_*_*_*',
+	# Keep anything produced by metFilter
+	# 'keep *_metFilter_*_*',
+	# *patEventContent)
+)
+
+
+# load the coreTools of PAT
+from PhysicsTools.PatAlgos.tools.coreTools import removeMCMatching
+removeMCMatching(process, ['All'], 'PFlowNoChs', ['out'])
+removeMCMatching(process, ['All'], 'PFlowChs', ['out'])
 
 
 # storage
 process.outpath = cms.EndPath(process.out) #dummy
 
-  
+

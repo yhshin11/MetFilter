@@ -111,34 +111,36 @@ MetFilter::MetFilter(const edm::ParameterSet& iConfig)
 	mVerticesToken = consumes<reco::VertexCollection> ( vertices_ ) ;
 
 	// Register products
-	// MET:
-	// pfMet, pfMetT1, pfMetT1 w/ CHS Jets
-	produces< double > ( "pfMetPt"         ).setBranchAlias ( "pfMetPt"         ) ;
-	produces< double > ( "pfMetPhi"        ).setBranchAlias ( "pfMetPhi"        ) ;
-	produces< double > ( "pfMetSumEt"      ).setBranchAlias ( "pfMetSumEt"      ) ;
-	produces< double > ( "pfMetT1Pt"       ).setBranchAlias ( "pfMetT1Pt"       ) ;
-	produces< double > ( "pfMetT1Phi"      ).setBranchAlias ( "pfMetT1Phi"      ) ;
-	produces< double > ( "pfMetT1SumEt"    ).setBranchAlias ( "pfMetT1SumEt"    ) ;
-	produces< double > ( "pfMetT1CHSPt"    ).setBranchAlias ( "pfMetT1CHSPt"    ) ;
-	produces< double > ( "pfMetT1CHSPhi"   ).setBranchAlias ( "pfMetT1CHSPhi"   ) ;
-	produces< double > ( "pfMetT1CHSSumEt" ).setBranchAlias ( "pfMetT1CHSSumEt" ) ;
-	// Muons:
-	// cleanPatMuons
-	produces< doubleVector > ("muonPts"  ) .setBranchAlias("muonPts"  ) ;
-	produces< doubleVector > ("muonEtas" ) .setBranchAlias("muonEtas" ) ;
-	produces< doubleVector > ("muonPhis" ) .setBranchAlias("muonPhis" ) ;
-	// Jets:
-	// Jets, CHSJets
-	produces< doubleVector > ( "JetPts"     ).setBranchAlias ( "JetPts"     ) ;
-	produces< doubleVector > ( "JetEtas"    ).setBranchAlias ( "JetEtas"    ) ;
-	produces< doubleVector > ( "JetPhis"    ).setBranchAlias ( "JetPhis"    ) ;
-	produces< doubleVector > ( "ChsJetPts"  ).setBranchAlias ( "ChsJetPts"  ) ;
-	produces< doubleVector > ( "ChsJetEtas" ).setBranchAlias ( "ChsJetEtas" ) ;
-	produces< doubleVector > ( "ChsJetPhis" ).setBranchAlias ( "ChsJetPhis" ) ;
+  /*
+	 * // MET:
+	 * // pfMet, pfMetT1, pfMetT1 w/ CHS Jets
+	 * produces< double > ( "pfMetPt"         ).setBranchAlias ( "pfMetPt"         ) ;
+	 * produces< double > ( "pfMetPhi"        ).setBranchAlias ( "pfMetPhi"        ) ;
+	 * produces< double > ( "pfMetSumEt"      ).setBranchAlias ( "pfMetSumEt"      ) ;
+	 * produces< double > ( "pfMetT1Pt"       ).setBranchAlias ( "pfMetT1Pt"       ) ;
+	 * produces< double > ( "pfMetT1Phi"      ).setBranchAlias ( "pfMetT1Phi"      ) ;
+	 * produces< double > ( "pfMetT1SumEt"    ).setBranchAlias ( "pfMetT1SumEt"    ) ;
+	 * produces< double > ( "pfMetT1CHSPt"    ).setBranchAlias ( "pfMetT1CHSPt"    ) ;
+	 * produces< double > ( "pfMetT1CHSPhi"   ).setBranchAlias ( "pfMetT1CHSPhi"   ) ;
+	 * produces< double > ( "pfMetT1CHSSumEt" ).setBranchAlias ( "pfMetT1CHSSumEt" ) ;
+	 * // Muons:
+	 * // cleanPatMuons
+	 * produces< doubleVector > ("muonPts"  ) .setBranchAlias("muonPts"  ) ;
+	 * produces< doubleVector > ("muonEtas" ) .setBranchAlias("muonEtas" ) ;
+	 * produces< doubleVector > ("muonPhis" ) .setBranchAlias("muonPhis" ) ;
+	 * // Jets:
+	 * // Jets, CHSJets
+	 * produces< doubleVector > ( "JetPts"     ).setBranchAlias ( "JetPts"     ) ;
+	 * produces< doubleVector > ( "JetEtas"    ).setBranchAlias ( "JetEtas"    ) ;
+	 * produces< doubleVector > ( "JetPhis"    ).setBranchAlias ( "JetPhis"    ) ;
+	 * produces< doubleVector > ( "ChsJetPts"  ).setBranchAlias ( "ChsJetPts"  ) ;
+	 * produces< doubleVector > ( "ChsJetEtas" ).setBranchAlias ( "ChsJetEtas" ) ;
+	 * produces< doubleVector > ( "ChsJetPhis" ).setBranchAlias ( "ChsJetPhis" ) ;
+   */
 	// Vertices:
 	// Number of good offlinePrimaryVertices
 	produces< int > ("nVtx").setBranchAlias("nVtx");
-	produces< int > ("nAllVtx").setBranchAlias("nAllVtx");
+	produces< int > ("nGoodVtx").setBranchAlias("nGoodVtx");
 
 
 }
@@ -163,140 +165,145 @@ MetFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 
-	////////////////////////////////////////////////
-	// MET
-	////////////////////////////////////////////////
-	std::auto_ptr< double > pfMetPt         ( new double);
-	std::auto_ptr< double > pfMetPhi        ( new double);
-	std::auto_ptr< double > pfMetSumEt      ( new double);
-	std::auto_ptr< double > pfMetT1Pt       ( new double);
-	std::auto_ptr< double > pfMetT1Phi      ( new double);
-	std::auto_ptr< double > pfMetT1SumEt    ( new double);
-	std::auto_ptr< double > pfMetT1CHSPt    ( new double);
-	std::auto_ptr< double > pfMetT1CHSPhi   ( new double);
-	std::auto_ptr< double > pfMetT1CHSSumEt ( new double);
+  /*
+	 * ////////////////////////////////////////////////
+	 * // MET
+	 * ////////////////////////////////////////////////
+	 * std::auto_ptr< double > pfMetPt         ( new double);
+	 * std::auto_ptr< double > pfMetPhi        ( new double);
+	 * std::auto_ptr< double > pfMetSumEt      ( new double);
+	 * std::auto_ptr< double > pfMetT1Pt       ( new double);
+	 * std::auto_ptr< double > pfMetT1Phi      ( new double);
+	 * std::auto_ptr< double > pfMetT1SumEt    ( new double);
+	 * std::auto_ptr< double > pfMetT1CHSPt    ( new double);
+	 * std::auto_ptr< double > pfMetT1CHSPhi   ( new double);
+	 * std::auto_ptr< double > pfMetT1CHSSumEt ( new double);
 
-	Handle<reco::PFMETCollection> pfMetHandle;
-  iEvent.getByLabel("pfMet", pfMetHandle);
-	Handle<reco::PFMETCollection> pfMetT1Handle;
-  iEvent.getByLabel("pfMetT1", pfMetT1Handle);
-	Handle<reco::PFMETCollection> pfMetT1CHSHandle;
-  iEvent.getByLabel("pfMetT1CHS", pfMetT1CHSHandle);
+	 * Handle<reco::PFMETCollection> pfMetHandle;
+   * iEvent.getByLabel("pfMet", pfMetHandle);
+	 * Handle<reco::PFMETCollection> pfMetT1Handle;
+   * iEvent.getByLabel("pfMetT1", pfMetT1Handle);
+	 * Handle<reco::PFMETCollection> pfMetT1CHSHandle;
+   * iEvent.getByLabel("pfMetT1CHS", pfMetT1CHSHandle);
 
-	*pfMetPt         = pfMetHandle.       product()->front().  pt();
-	*pfMetPhi        = pfMetHandle.       product()->front().  phi();
-	*pfMetSumEt      = pfMetHandle.       product()->front().  sumEt();
-	*pfMetT1Pt       = pfMetT1Handle.     product()->front().  pt();
-	*pfMetT1Phi      = pfMetT1Handle.     product()->front().  phi();
-	*pfMetT1SumEt    = pfMetT1Handle.     product()->front().  sumEt();
-	*pfMetT1CHSPt    = pfMetT1CHSHandle.  product()->front().  pt();
-	*pfMetT1CHSPhi   = pfMetT1CHSHandle.  product()->front().  phi();
-	*pfMetT1CHSSumEt = pfMetT1CHSHandle.  product()->front().  sumEt();
+	 * *pfMetPt         = pfMetHandle.       product()->front().  pt();
+	 * *pfMetPhi        = pfMetHandle.       product()->front().  phi();
+	 * *pfMetSumEt      = pfMetHandle.       product()->front().  sumEt();
+	 * *pfMetT1Pt       = pfMetT1Handle.     product()->front().  pt();
+	 * *pfMetT1Phi      = pfMetT1Handle.     product()->front().  phi();
+	 * *pfMetT1SumEt    = pfMetT1Handle.     product()->front().  sumEt();
+	 * *pfMetT1CHSPt    = pfMetT1CHSHandle.  product()->front().  pt();
+	 * *pfMetT1CHSPhi   = pfMetT1CHSHandle.  product()->front().  phi();
+	 * *pfMetT1CHSSumEt = pfMetT1CHSHandle.  product()->front().  sumEt();
 
-	iEvent.put (pfMetPt         , "pfMetPt"         ) ;
-	iEvent.put (pfMetPhi        , "pfMetPhi"        ) ;
-	iEvent.put (pfMetSumEt      , "pfMetSumEt"      ) ;
-	iEvent.put (pfMetT1Pt       , "pfMetT1Pt"       ) ;
-	iEvent.put (pfMetT1Phi      , "pfMetT1Phi"      ) ;
-	iEvent.put (pfMetT1SumEt    , "pfMetT1SumEt"    ) ;
-	iEvent.put (pfMetT1CHSPt    , "pfMetT1CHSPt"    ) ;
-	iEvent.put (pfMetT1CHSPhi   , "pfMetT1CHSPhi"   ) ;
-	iEvent.put (pfMetT1CHSSumEt , "pfMetT1CHSSumEt" ) ;
+	 * iEvent.put (pfMetPt         , "pfMetPt"         ) ;
+	 * iEvent.put (pfMetPhi        , "pfMetPhi"        ) ;
+	 * iEvent.put (pfMetSumEt      , "pfMetSumEt"      ) ;
+	 * iEvent.put (pfMetT1Pt       , "pfMetT1Pt"       ) ;
+	 * iEvent.put (pfMetT1Phi      , "pfMetT1Phi"      ) ;
+	 * iEvent.put (pfMetT1SumEt    , "pfMetT1SumEt"    ) ;
+	 * iEvent.put (pfMetT1CHSPt    , "pfMetT1CHSPt"    ) ;
+	 * iEvent.put (pfMetT1CHSPhi   , "pfMetT1CHSPhi"   ) ;
+	 * iEvent.put (pfMetT1CHSSumEt , "pfMetT1CHSSumEt" ) ;
 
-	////////////////////////////////////////////////
-	// Muons
-	////////////////////////////////////////////////
-	std::auto_ptr< doubleVector > muonPts  ( new doubleVector);
-	std::auto_ptr< doubleVector > muonEtas ( new doubleVector);
-	std::auto_ptr< doubleVector > muonPhis ( new doubleVector);
+	 * ////////////////////////////////////////////////
+	 * // Muons
+	 * ////////////////////////////////////////////////
+	 * std::auto_ptr< doubleVector > muonPts  ( new doubleVector);
+	 * std::auto_ptr< doubleVector > muonEtas ( new doubleVector);
+	 * std::auto_ptr< doubleVector > muonPhis ( new doubleVector);
 
-	Handle<pat::MuonCollection> muonHandle;
-  iEvent.getByLabel("cleanPatMuons", muonHandle);
+	 * Handle<pat::MuonCollection> muonHandle;
+   * iEvent.getByLabel("cleanPatMuons", muonHandle);
 
-	muonPts->reserve(muonHandle->size());
-	for (pat::MuonCollection::const_iterator it = muonHandle->begin(); it != muonHandle->end(); it++) {
-		pat::Muon currentObj = *it;
+	 * muonPts->reserve(muonHandle->size());
+	 * for (pat::MuonCollection::const_iterator it = muonHandle->begin(); it != muonHandle->end(); it++) {
+	 * 	pat::Muon currentObj = *it;
 
-		double pt  = currentObj.   pt();
-		double eta = currentObj.  eta();
-		double phi = currentObj.  phi();
-		muonPts->push_back(pt);
-		muonEtas->push_back(eta);
-		muonPhis->push_back(phi);
-	}
+	 * 	double pt  = currentObj.   pt();
+	 * 	double eta = currentObj.  eta();
+	 * 	double phi = currentObj.  phi();
+	 * 	muonPts->push_back(pt);
+	 * 	muonEtas->push_back(eta);
+	 * 	muonPhis->push_back(phi);
+	 * }
 
-	iEvent.put (muonPts    , "muonPts"    );
+	 * iEvent.put (muonPts    , "muonPts"    );
 
-	////////////////////////////////////////////////
-	// Jets
-	////////////////////////////////////////////////
-	std::auto_ptr< doubleVector > jetPts             ( new doubleVector);
-	std::auto_ptr< doubleVector > jetEtas            ( new doubleVector);
-	std::auto_ptr< doubleVector > jetPhis            ( new doubleVector);
-	std::auto_ptr< doubleVector > chsJetPts          ( new doubleVector);
-	std::auto_ptr< doubleVector > chsJetEtas         ( new doubleVector);
-	std::auto_ptr< doubleVector > chsJetPhis         ( new doubleVector);
+	 * ////////////////////////////////////////////////
+	 * // Jets
+	 * ////////////////////////////////////////////////
+	 * std::auto_ptr< doubleVector > jetPts             ( new doubleVector);
+	 * std::auto_ptr< doubleVector > jetEtas            ( new doubleVector);
+	 * std::auto_ptr< doubleVector > jetPhis            ( new doubleVector);
+	 * std::auto_ptr< doubleVector > chsJetPts          ( new doubleVector);
+	 * std::auto_ptr< doubleVector > chsJetEtas         ( new doubleVector);
+	 * std::auto_ptr< doubleVector > chsJetPhis         ( new doubleVector);
 
-	Handle<reco::PFJetCollection> jetCollection;
-	Handle<reco::PFJetCollection> chsJetCollection;
-	iEvent.getByToken(mJetsToken, jetCollection);
-	iEvent.getByToken(mChsJetsToken, chsJetCollection);
+	 * Handle<reco::PFJetCollection> jetCollection;
+	 * Handle<reco::PFJetCollection> chsJetCollection;
+	 * iEvent.getByToken(mJetsToken, jetCollection);
+	 * iEvent.getByToken(mChsJetsToken, chsJetCollection);
 
-	jetPts->reserve(jetCollection->size());
-	jetEtas->reserve(jetCollection->size());
-	jetPhis->reserve(jetCollection->size());
-	for (reco::PFJetCollection::const_iterator it = jetCollection->begin(); it != jetCollection->end(); it++) {
-		reco::PFJet currentObj = *it;
-		double pt  = currentObj.   pt();
-		double eta = currentObj.  eta();
-		double phi = currentObj.  phi();
-		jetPts->push_back(pt);
-		jetEtas->push_back(eta);
-		jetPhis->push_back(phi);
-	}
-	iEvent.put (jetPts,   "JetPts");
-	iEvent.put (jetEtas,  "JetEtas");
-	iEvent.put (jetPhis,  "JetPhis");
+	 * jetPts->reserve(jetCollection->size());
+	 * jetEtas->reserve(jetCollection->size());
+	 * jetPhis->reserve(jetCollection->size());
+	 * for (reco::PFJetCollection::const_iterator it = jetCollection->begin(); it != jetCollection->end(); it++) {
+	 * 	reco::PFJet currentObj = *it;
+	 * 	double pt  = currentObj.   pt();
+	 * 	double eta = currentObj.  eta();
+	 * 	double phi = currentObj.  phi();
+	 * 	jetPts->push_back(pt);
+	 * 	jetEtas->push_back(eta);
+	 * 	jetPhis->push_back(phi);
+	 * }
+	 * iEvent.put (jetPts,   "JetPts");
+	 * iEvent.put (jetEtas,  "JetEtas");
+	 * iEvent.put (jetPhis,  "JetPhis");
 
-	chsJetPts->reserve(chsJetCollection->size());
-	chsJetEtas->reserve(chsJetCollection->size());
-	chsJetPhis->reserve(chsJetCollection->size());
-	for (reco::PFJetCollection::const_iterator it = chsJetCollection->begin(); it != chsJetCollection->end(); it++) {
-		reco::PFJet currentObj = *it;
-		double pt  = currentObj.   pt();
-		double eta = currentObj.  eta();
-		double phi = currentObj.  phi();
-		chsJetPts->push_back(pt);
-		chsJetEtas->push_back(eta);
-		chsJetPhis->push_back(phi);
-	}
-	iEvent.put (chsJetPts,   "ChsJetPts");
-	iEvent.put (chsJetEtas,  "ChsJetEtas");
-	iEvent.put (chsJetPhis,  "ChsJetPhis");
+	 * chsJetPts->reserve(chsJetCollection->size());
+	 * chsJetEtas->reserve(chsJetCollection->size());
+	 * chsJetPhis->reserve(chsJetCollection->size());
+	 * for (reco::PFJetCollection::const_iterator it = chsJetCollection->begin(); it != chsJetCollection->end(); it++) {
+	 * 	reco::PFJet currentObj = *it;
+	 * 	double pt  = currentObj.   pt();
+	 * 	double eta = currentObj.  eta();
+	 * 	double phi = currentObj.  phi();
+	 * 	chsJetPts->push_back(pt);
+	 * 	chsJetEtas->push_back(eta);
+	 * 	chsJetPhis->push_back(phi);
+	 * }
+	 * iEvent.put (chsJetPts,   "ChsJetPts");
+	 * iEvent.put (chsJetEtas,  "ChsJetEtas");
+	 * iEvent.put (chsJetPhis,  "ChsJetPhis");
+   */
 
 
 	////////////////////////////////////////////////
 	// Vertices
 	////////////////////////////////////////////////
 	std::auto_ptr< int > nVtx    ( new int);
-	std::auto_ptr< int > nAllVtx ( new int);
+	std::auto_ptr< int > nGoodVtx ( new int);
+	*nVtx = 0;
+	*nGoodVtx = 0;
 	// int nVtx = 0;
 	// int nAllVtx = 0;
 	Handle<reco::VertexCollection> vertexCollection;
 	iEvent.getByToken(mVerticesToken, vertexCollection);
 
-	for (reco::VertexCollection::const_iterator it = vertexCollection->begin(); it != vertexCollection->end(); it++) {
-		reco::Vertex currentVertex = *it;
+	for (auto it = vertexCollection->begin(); it != vertexCollection->end(); it++) {
+		auto currentVertex = *it;
 		bool vertexIsGood = (!currentVertex.isFake()) && (currentVertex.ndof()>4) && (fabs(currentVertex.z()<=24.0)) && (currentVertex.position().Rho()<=2.0);
 		// std::cout << "!currentVertex.isFake() ,  currentVertex.ndof()>4 ,  fabs(currentVertex.z()<=24.0) ,  currentVertex.position().Rho()<=2.0; " 
 		// 	<< (!currentVertex.isFake()) << ", " << (currentVertex.ndof()>4) << ", " << (fabs(currentVertex.z()<=24.0)) << ", " << (currentVertex.position().Rho()<=2.0) << std::endl;
 		// std::cout << "vertexIsGood " << vertexIsGood << std::endl;
-		if (vertexIsGood) (*nVtx)++;
-		(*nAllVtx)++;
+		if (vertexIsGood) (*nGoodVtx)++;
+		(*nVtx)++;
 	}
+	// std::cout << "nGoodVtx, nVtx:\t" << *nGoodVtx << ", " << *nVtx << "\n";
 
 	iEvent.put (nVtx, "nVtx");
-	iEvent.put (nAllVtx, "nAllVtx");
+	iEvent.put (nGoodVtx, "nGoodVtx");
 
 #ifdef THIS_IS_AN_EVENT_EXAMPLE
 	Handle<ExampleData> pIn;
